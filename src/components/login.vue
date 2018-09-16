@@ -1,7 +1,10 @@
 <template xmlns:v-on="http://www.w3.org/1999/xhtml">
-    <div id="mws-login">
+<div>
+    <img src="../../resources/images/bg/fengmian4.jpg" style="center"/> 
+    <div id="mws-login" >
         <div id="header">
-       <span id="h1">Hiperledger Demo</span><span id="error" v-show="noLogin">用户名或密码不正确</span>
+       <span id="h1">湾居·协同授权系统后台管理</span>
+       <span id="error" v-show="noLogin">用户名或密码不正确</span>
         </div>
         <div class="mws-login-lock"><img src="../../resources/css/icons/24/locked-2.png" alt="" /></div>
         <div id="mws-login-form">
@@ -24,6 +27,7 @@
 
             </form>
         </div>
+    </div>
     </div>
 </template>
 

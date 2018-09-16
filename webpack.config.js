@@ -29,7 +29,6 @@ module.exports = {
             Vue: 'Vue'
         }),
 		new CopyWebpackPlugin([
-            {from: __dirname + '/src/mockData/user.json'},
             {from: __dirname + '/src/config/urlConfig.json'},
         ]),
     ],

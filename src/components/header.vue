@@ -2,17 +2,18 @@
     <div id="mws-header" class="clearfix">
         <div id="mws-logo-container">
             <div id="mws-logo-wrap">
-                <img src="../../resources/images/xiaobaiju-logo.png" alt="Wan Ju"/>     湾居·Home
+                <img src="../../resources/images/logo.png" alt="Wan Ju"/>湾居·协同授权系统
             </div>
         </div>
         <div id="mws-user-tools" class="clearfix">
+        <li style="display:inline-block;margin-top:8px;"><router-link class="qiantai" to="/loginFront">前台登录</router-link></li>
             <div id="mws-user-info" class="mws-inset">
                 <div id="mws-user-photo">
-                    <img src="../../resources/images/example/profile.jpg" alt="User Photo"/>
+                    <img src="../../resources/images/admin.jpg" alt="User Photo"/>
                 </div>
                 <div id="mws-user-functions">
                     <div id="mws-username" style="color: #F5DEB3">
-                        你好：{{username}}
+                        你好：{{username}}（{{position}}）
                     </div>
                     <ul>
                         <li><a href="#" v-on:click.prevent="logout">退出登录</a></li>
@@ -25,24 +26,29 @@
 
 <script>
     var constants = require('../constants'),
-            adminService = require('../services/adminService'),
-            $ = require('jquery'),
-            jAlert = require('../thirdParty/jquery.alert');
+        adminService = require('../services/adminService'),
+        $ = require('jquery'),
+        jAlert = require('../thirdParty/jquery.alert');
 
     export default {
         name: 'header',
         data: function () {
             return {
-                username: null,
+                username: '',
+                position: '',
                 newPwd: null,
                 confirmPwd: null,
                 changePwdMsg: '',
             }
         },
-
+        mounted: function () {
+                let userInfoList = JSON.parse(localStorage.getItem(constants.USERINFO));
+			    this.username=userInfoList["userInfo"]["userName"];
+                this.position=userInfoList["userInfo"]["position"];
+        },
         ready: function () {
             this.changePwdMsg = '';
-            this.username = adminService.getCurrentUser().realName;
+            //this.username = adminService.getCurrentUser().realName;
             $('#d').dialog({
                 autoOpen: false,
                 modal: true
@@ -61,7 +67,7 @@
                 jAlert.jConfirm('确定要退出登录么？', '退出登录', function(result) {
                     if (result) {
                         adminService.logout();
-                        self.$router.go('/login');
+                        self.$router.push('/login');
                     }
                 });
             },
@@ -117,6 +123,9 @@
     }
     #changePwdMsg{
         color:#fa4500;
+    }
+    .qiantai{
+        color:#fff;
     }
 
 </style>

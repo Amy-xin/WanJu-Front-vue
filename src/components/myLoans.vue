@@ -1,49 +1,59 @@
 <template xmlns:v-on="http://www.w3.org/1999/xhtml">
     <div class="mws-panel grid_8" id="app">
         <div class="mws-panel-header">
-            <span class="mws-i-24 i-table-1">和规范化</span>
+            <span class="mws-i-24 i-table-1">授权管理</span>
         </div>
         <div class="mws-panel-body">
             <div class="dataTables_wrapper">	
                 <table class="mws-datatable-fn mws-table">
                     <thead>
                     <tr>
-                        <th>姓名</th>
-                        <th>星座</th>
-                        <th>性别</th>
-                        <th>电话</th>
+                        <th>ID</th>
+                        <th>用户名</th>
                         <th>职位</th>
-						<th>现居地</th>
-						<th>住房要求</th>
+						<th>权限等级</th>
                     </tr>
                     </thead>
+                    <addAuth @hidden="hiddenShow" v-show="isAddAuthShow">  </addAuth>
+                    <addUpdate @hidden="hiddenShow" v-show="isUpdateAuthShow">  </addUpdate>
+                    <addDelete @hidden="hiddenShow" v-show="isDeleteAuthShow">  </addDelete>
                     <tbody v-for="(loan, index) in loanList">
-
                     <tr :class="{'gradeX even': index % 2 === 0, 'gradeA odd': index % 2 !== 0 }">
-                        <td>{{loan.name}}</td>
-                        <td>{{loan.initor}}</td>
-                        <td>{{loan.amount}}</td>
-                        <td>{{loan.rate}}</td>
-						<td>{{loan.days}}</td>
-						<td>{{loan.status}}</td>
+                        <td>{{loan.userId}}</td>
+                        <td>{{loan.userName}}</td>
+                        <td>{{loan.position}}</td>
+                        <td>{{loan.rank}}</td>
+                       <!--<td><a href="javascript:;" v-on:click="updateAuthShow">修改</a> | <a href="javascript:;">删除</a></td>-->
                     </tr>
                     </tbody>
                 </table>
                 <!--<pagination v-bind:total="paging.total" :current-page="paging.currentPage" v-events="gotoPage: gotoPage"></pagination>-->
                 </div>
         </div>
+        <li class="bottonLi">
+        <input class="bottonadd" type="button" value="新增" v-on:click="addAuthShow">
+        <input class="bottonupdate" type="button" value="编辑" v-on:click="updateAuthShow">
+        <input class="bottondelect" type="button" value="删除" v-on:click="deleteAuthShow">
+        </li>
     </div>
 </template>
 
 <script>
-    var loanService = require('../services/loanService'),
-            constant = require('../constants'),
-            pagination = require('./pagination.vue'),
-			adminService = require('../services/adminService');
+    var authService = require('../services/authService'),
+        constant = require('../constants'),
+        pagination = require('./pagination.vue'),
+		adminService = require('../services/adminService'),
+        addAuth = require('./Authadd.vue'),
+        addUpdate = require('./Authupdate.vue'),
+        addDelete = require('./Authdelete.vue'),
+        constants = require('../constants');
 
     export default {
         components: {
-            pagination
+            pagination,   //引用组件
+            addAuth,
+            addUpdate,
+            addDelete
         },
 
         data: function () {
@@ -55,61 +65,57 @@
                     currentPage: 0,
                     pageList:[],
                 },
-                loanList: []
+                loanList: [],
+                isAddAuthShow:false,
+                isUpdateAuthShow:false,
+                isDeleteAuthShow:false
             }
         },
         mounted: function () {
-			this.loanList = loanService.getLoanListByAdmin(adminService.getCurrentUser().enrollId);
-        },
-        route: {
-            data : function({ to }){
-                this.getParam();
-                this.init();
-            }
-        },
-        events: {
-            gotoPage: function (page) {
-                this.paging.start = (page - 1) * constant.ROWS;
-                this.init();
-            }
+                let userInfoList = JSON.parse(localStorage.getItem(constants.USERINFO));
+			    this.getAuthInfo(userInfoList);
         },
         methods: {
-            getParam: function() {
-                this.adminCriteria = this.$route.query;
-                if(this.$route.query.start) this.paging.start = this.$route.query.start;
-            },
-            setPages: function() {
-                this.paging.currentPage = this.paging.start / constant.ROWS + 1;
-                this.paging.pageList = [];
-                for (var i = this.paging.currentPage - 2; i <= this.paging.lastPage; i++) {
-                    if (i < 1) {
-                        continue;
-                    }
-                    this.paging.pageList.push(i);
-                    if (this.paging.pageList.length > 4) break;
+            getAuthInfo:function(userInfoList){
+                let logPosition = userInfoList["userInfo"]["position"];
+                if(logPosition=='老板'){
+                    authService.getAuthInfo().then(response => {
+                        this.loanList = response.userInfo;
+                });
+                }else if(logPosition=='经理'){
+                    authService.getAuthInfoNotBoss().then(response => {
+                        this.loanList = response.userInfo;
+                    });
+                }else{
+                    authService.getAuthInfoStaff().then(response => {
+                        this.loanList = response.userInfo;
+                    });
                 }
-                console.log(this.paging.pageList, this.paging.lastPage);
+                
             },
-            init: function () {
-                var self = this;
-                this.userList = [];
-                userService.searchUser(this.paging.start, this.adminCriteria).then(
-                        function (response) {
-                            self.userList = response.result.users;
-                            self.paging.total = response.result.total;
-                            self.paging.lastPage = self.paging.total%constant.ROWS == 0 ? parseInt(self.paging.total / constant.ROWS) : parseInt(self.paging.total / constant.ROWS) + 1;
-                            self.setPages();
-                        }
-                )
+            //新增弹出框显示（组件引用的弹出框）
+            addAuthShow:function(){
+                console.log("aaaaa")
+                this.isAddAuthShow=true;
             },
-            gotoDetail: function (id) {
-                this.$router.go('/main/userDetail/' + id);
+            //修改弹出框显示（组件引用的弹出框）
+            updateAuthShow:function(){
+                console.log("gggg")
+                this.isUpdateAuthShow=true;
             },
-            gotoPage: function (page) {
-//                this.paging.start = (page - 1) * constant.ROWS;
-//                this.init();
-                console.log(page);
+            //新增弹出框显示（组件引用的弹出框）
+            deleteAuthShow:function(){
+                console.log("ddddd")
+                this.isDeleteAuthShow=true;
+            },
+            //更改密码弹出框隐藏（传给组件一个点击事件）
+            hiddenShow(){
+                let that = this;
+                that.isAddAuthShow = false;
+                that.isUpdateAuthShow = false;
+                that.isDeleteAuthShow=false;
             }
+            
         }
     }
 </script>

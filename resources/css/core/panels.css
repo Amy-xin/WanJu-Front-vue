@@ -8,7 +8,7 @@
 .mws-panel .mws-panel-header
 {
 	background:url(../../images/core/mws-panel-header-bg.png) repeat-x;
-	height:25px;
+	height:40px;
 	position:relative;
 	padding:12px;
 	font-size:14px;
@@ -124,4 +124,33 @@
 	-o-box-shadow:0px 3px 3px -2px rgba(0, 0, 0, 0.15);
 	-khtml-box-shadow:0px 3px 3px -2px rgba(0, 0, 0, 0.15);
 	box-shadow:0px 3px 3px -2px rgba(0, 0, 0, 0.15);
+}
+
+.mws-panel .bottonLi{
+	margin:20px auto 0px;
+	width:fit-content;
+}
+
+.mws-panel .bottonadd{
+	background-color: rgb(94, 247, 89);
+	padding: 8px 15px; 
+	margin:0px 20px;
+	font-size: 20px;
+    color: #FFFFFF;
+}
+
+.mws-panel .bottonupdate{
+	background-color: rgb(51, 173, 243);
+	padding: 8px 15px; 
+	margin:0px 20px;
+	font-size: 20px;
+    color: #FFFFFF;
+}
+
+.mws-panel .bottondelect{
+	background-color: rgb(247, 43, 43);
+	padding: 8px 15px; 
+	margin:0px 20px;
+	font-size: 20px;
+    color: #FFFFFF;
 }

@@ -42,7 +42,8 @@
   "dependencies": {
     "jquery": "~2.1.1",
     "vue": "^2.0.0",
-    "vue-router": "^2.3.0",
-    "vue-resource": "^1.2.1"
+    "vue-concise-slider": "^2.4.8",
+    "vue-resource": "^1.2.1",
+    "vue-router": "^2.3.0"
   }
 }

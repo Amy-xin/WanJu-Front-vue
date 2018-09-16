@@ -64,7 +64,7 @@ div#mws-logo-container #mws-logo-wrap
 	text-align:left;
 	vertical-align:middle;
 	display:table-cell;
-	font-size:24px;
+	font-size:20px;
 	color:#FFF
 }
 
@@ -99,7 +99,7 @@ div#mws-user-tools .mws-dropdown-menu
 div#mws-user-tools #mws-user-info
 {
 	display:block;
-	height:32px;
+	height:38px;
 	padding:4px;
 }
 

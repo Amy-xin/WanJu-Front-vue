@@ -1,30 +1,68 @@
-/**
- * Created by hepf3 on 6/5/2016.
- */
 var constants = require('../constants');
 var ajaxUtils = require('../utils/ajaxUtils.js');
+var ajax = require('../utils/ajax.js');
 
 module.exports = {
-    loginLocal: function (username, password) {
-        let data = {name: username, password: password},
-            matchedUser;
-        return ajaxUtils.call({
-            url: 'user.json',
-            data: data,
-            type: 'GET'}).then(response => {
-            matchedUser = response.find(user => {
-                return user.username === username && user.password === password;
+    loginWatch: function (username, password) {
+        const url=constants.LOCALHOST+'/play/findUserLoginByName';
+        let data = {"userName": username};
+        //let matchedUser;
+        return ajax.call({
+            url: url,
+            data: JSON.stringify(data),
+            login:true,
+            dataType: "json",
+            contentType: "application/json; charset=UTF-8",
+            method: 'POST'}).then(response => {
+                return response;
             });
-            localStorage.setItem(constants.SESSION_KEY, JSON.stringify(matchedUser));
-            return matchedUser;
-        });
+    },
+
+    testByNameAndPwd1:function(username, password){
+        let isTrue = false;
+        return this.loginWatch(username, password)
+        .then(response =>{
+            if(response["userInfo"]["userName"] === username && response["userInfo"]["userPwd"] === password&& response["userInfo"]["position"] =="经理"){
+                isTrue = true;
+                return  isTrue;
+            }
+            return  isTrue;
+        })
+    },
+    testByNameAndPwd2:function(username, password){
+        let isTrue = false;
+        return this.loginWatch(username, password)
+        .then(response =>{
+            if(response["userInfo"]["userName"] === username && response["userInfo"]["userPwd"] === password&& response["userInfo"]["position"] =="老板"){
+                isTrue = true;
+                return  isTrue;
+            }
+            return  isTrue;
+        })
     },
 
     login: function (username, password) {
         let data = {name: username, password: password},
             matchedUser;
-        return this.loginLocal(username, password)
-            .then(user => {this.register(user.enrollId, user.enrollSecret)});
+        return this.loginWatch(username, password)
+        .then(response =>{
+            if(response["userInfo"]["userName"] === username && response["userInfo"]["userPwd"] === password){
+                delete response["userInfo"]["userPwd"]
+                localStorage.setItem(constants.USERINFO, JSON.stringify(response));
+                const url=constants.LOCALHOST+'/login';
+                let data = {"userName": username};
+                return ajax.call({
+                    url: url,
+                    data: JSON.stringify(data),
+                    login:true,
+                    dataType: "json",
+                    contentType: "application/json; charset=UTF-8",
+                    method: 'POST'}).then(token => {
+                        sessionStorage.setItem(constants.AUTHORIZATION, JSON.stringify(token));
+                        return token;
+                    });
+            }
+        })
     },
 
     register: function(username, secret) {
@@ -58,184 +96,6 @@ module.exports = {
     },
 
     logout: function () {
-        localStorage.removeItem(constants.SESSION_KEY);
-    },
-
-    changePassword: function (userId, password) {
-        var admin = JSON.parse(localStorage.getItem(constants.SESSION_KEY)),
-            operatorId = admin.userId,
-            data = {id: userId, admin: {password: password}, operatorId: operatorId};
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: '/api/admin/update',
-                data: JSON.stringify(data),
-                dataType: 'json',
-                type: 'POST',
-                contentType: 'application/json',
-                success: function (response) {
-                    if (response.status = constants.API_STATUS_SUCCESS) {
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                },
-                error: function (error) {
-                    console.error(error);
-                    reject(error);
-                }
-            });
-        });
-    },
-
-    getCurrentUser: function () {
-        return JSON.parse(localStorage.getItem(constants.SESSION_KEY));
-    },
-
-    getAdminList: function () {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: '/api/admin/findAll',
-                dataType: 'json',
-                type: 'GET',
-                contentType: 'application/json',
-                success: function (response) {
-                    if (response.status = constants.API_STATUS_SUCCESS) {
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                },
-                error: function (error) {
-                    reject(error);
-                }
-            });
-        });
-    },
-
-    getAdminById: function (id) {
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: '/api/admin/searchById?id=' + id,
-                dataType: 'json',
-                type: 'GET',
-                contentType: 'application/json',
-                success: function (response) {
-                    if (response.status = constants.API_STATUS_SUCCESS) {
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                },
-                error: function (error) {
-                    reject(error);
-                }
-            });
-        });
-    },
-
-
-    updateAdmin: function (admin) {
-        var data = {
-                id: admin._id,
-                admin: {
-                    name: admin.name,
-                    realName: admin.realName
-                },
-                operatorId: this.getCurrentUser().userId
-            };
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: '/api/admin/update',
-                dataType: 'json',
-                type: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                success: function (response) {
-                    if (response.status = constants.API_STATUS_SUCCESS) {
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                },
-                error: function (error) {
-                    reject(error);
-                }
-            });
-        });
-    },
-
-
-    createAdmin: function (admin) {
-        var data = {
-                admin: admin,
-                operatorId: this.getCurrentUser().userId
-            };
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: '/api/admin/create',
-                dataType: 'json',
-                type: 'POST',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                success: function (response) {
-                    if (response.status = constants.API_STATUS_SUCCESS) {
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                },
-                error: function (error) {
-                    reject(error);
-                }
-            });
-        });
-    },
-
-    deleteAdmin: function (id) {
-        var data = {
-                id: id
-            };
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: '/api/admin/delete',
-                dataType: 'json',
-                type: 'DELETE',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                success: function (response) {
-                    if (response.status = constants.API_STATUS_SUCCESS) {
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                },
-                error: function (error) {
-                    reject(error);
-                }
-            });
-        });
-    },
-
-    massDelete: function(ids) {
-        var data = {ids: ids}
-        return new Promise(function (resolve, reject) {
-            $.ajax({
-                url: '/api/admin/massDelete',
-                dataType: 'json',
-                type: 'DELETE',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                success: function (response) {
-                    if (response.status = constants.API_STATUS_SUCCESS) {
-                        resolve(response);
-                    } else {
-                        reject(response);
-                    }
-                },
-                error: function (error) {
-                    reject(error);
-                }
-            });
-        });
+        sessionStorage.removeItem(constants.AUTHORIZATION);
     }
 };
